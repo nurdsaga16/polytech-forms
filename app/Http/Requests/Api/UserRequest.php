@@ -25,9 +25,10 @@ final class UserRequest extends FormRequest
     {
         return [
             'full_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $this->user()?->id],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$this->user()?->id],
             'password' => ['sometimes', 'nullable', 'string', 'min:6'],
             'avatar' => ['sometimes', 'nullable', 'string', 'url'], // URL на аватар
+            'reset_verification' => ['sometimes', 'boolean'],
         ];
     }
 }

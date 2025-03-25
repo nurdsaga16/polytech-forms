@@ -7,13 +7,16 @@ namespace App\MoonShine\Resources;
 use App\Models\Schedule;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
+use MoonShine\Core\Paginator\PaginatorCaster;
 use MoonShine\Laravel\Fields\Relationships\BelongsTo;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Support\Enums\PageType;
 use MoonShine\Support\Enums\SortDirection;
 use MoonShine\UI\Components\Layout\Box;
+use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\ID;
+use MoonShine\UI\Fields\Text;
 
 /**
  * @extends ModelResource<Schedule>
@@ -27,8 +30,6 @@ final class ScheduleResource extends ModelResource
     protected int $itemsPerPage = 10;
 
     protected array $with = ['user', 'group', 'practice'];
-
-    protected bool $cursorPaginate = true;
 
     protected bool $columnSelection = true;
 
@@ -131,6 +132,24 @@ final class ScheduleResource extends ModelResource
             'group.title',
             'start_date',
             'end_date',
+        ];
+    }
+
+    protected function components(): iterable
+    {
+        $model = Schedule::query()->paginate();
+
+        $paginator = (new PaginatorCaster(
+            $model->appends(request()->except('page'))->toArray(),
+            $model->items()
+        ))->cast();
+
+        return [
+            TableBuilder::make()
+                ->fields([
+                    Text::make('Name'),
+                ])
+                ->items($paginator),
         ];
     }
 }

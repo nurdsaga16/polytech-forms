@@ -7,12 +7,14 @@ namespace App\MoonShine\Resources;
 use App\Models\Department;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
+use MoonShine\Core\Paginator\PaginatorCaster;
 use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Support\Enums\PageType;
 use MoonShine\Support\Enums\SortDirection;
 use MoonShine\Support\ListOf;
 use MoonShine\UI\Components\Layout\Box;
+use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Text;
 
@@ -26,8 +28,6 @@ final class DepartmentResource extends ModelResource
     protected string $title = 'Отделения';
 
     protected int $itemsPerPage = 10;
-
-    protected bool $cursorPaginate = true;
 
     protected ?PageType $redirectAfterSave = PageType::INDEX;
 
@@ -90,6 +90,24 @@ final class DepartmentResource extends ModelResource
         return [
             'id',
             'title',
+        ];
+    }
+
+    protected function components(): iterable
+    {
+        $model = Department::query()->paginate();
+
+        $paginator = (new PaginatorCaster(
+            $model->appends(request()->except('page'))->toArray(),
+            $model->items()
+        ))->cast();
+
+        return [
+            TableBuilder::make()
+                ->fields([
+                    Text::make('Name'),
+                ])
+                ->items($paginator),
         ];
     }
 }

@@ -7,6 +7,7 @@ namespace App\MoonShine\Resources;
 use App\Models\ChoiceAnswer;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
+use MoonShine\Core\Paginator\PaginatorCaster;
 use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Fields\Relationships\BelongsTo;
 use MoonShine\Laravel\Resources\ModelResource;
@@ -14,7 +15,9 @@ use MoonShine\Support\Enums\PageType;
 use MoonShine\Support\Enums\SortDirection;
 use MoonShine\Support\ListOf;
 use MoonShine\UI\Components\Layout\Box;
+use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\UI\Fields\ID;
+use MoonShine\UI\Fields\Text;
 
 /**
  * @extends ModelResource<ChoiceAnswer>
@@ -28,8 +31,6 @@ final class ChoiceAnswerResource extends ModelResource
     protected int $itemsPerPage = 10;
 
     protected array $with = ['question', 'response', 'survey', 'answerOption'];
-
-    protected bool $cursorPaginate = true;
 
     protected bool $columnSelection = true;
 
@@ -128,6 +129,24 @@ final class ChoiceAnswerResource extends ModelResource
             'question.title',
             'survey.title',
             'answerOption.title',
+        ];
+    }
+
+    protected function components(): iterable
+    {
+        $model = ChoiceAnswer::query()->paginate();
+
+        $paginator = (new PaginatorCaster(
+            $model->appends(request()->except('page'))->toArray(),
+            $model->items()
+        ))->cast();
+
+        return [
+            TableBuilder::make()
+                ->fields([
+                    Text::make('Name'),
+                ])
+                ->items($paginator),
         ];
     }
 }

@@ -18,6 +18,7 @@ final class SurveyResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'public_id' => $this->public_id,
             'title' => $this->title,
             'description' => $this->description,
             'response_limit' => $this->response_limit,

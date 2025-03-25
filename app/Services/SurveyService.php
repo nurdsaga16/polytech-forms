@@ -20,9 +20,13 @@ final class SurveyService
             ->paginate();
     }
 
-    public function getSurveyById($id)
+    public function getSurveyById($identifier)
     {
-        return Survey::with(['schedule', 'user', 'practice', 'group', 'questions.answerOptions'])->findOrFail($id);
+        // Предполагаем, что $identifier может быть либо id, либо public_id
+        return Survey::with(['schedule', 'user', 'practice', 'group', 'questions.answerOptions'])
+            ->where('id', $identifier)
+            ->orWhere('public_id', $identifier)
+            ->firstOrFail();
     }
 
     public function createSurvey(array $data): Survey

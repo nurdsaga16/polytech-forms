@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('surveys', function (Blueprint $table) {
             $table->id();
+            $table->string('public_id')->unique();
             $table->string('title');
             $table->text('description')->nullable();
             $table->unsignedTinyInteger('response_limit')->nullable();

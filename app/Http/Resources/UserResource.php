@@ -21,6 +21,7 @@ final class UserResource extends JsonResource
             'full_name' => $this->full_name,
             'email' => $this->email,
             'avatar' => $this->avatar,
+            'email_verified_at' => $this->email_verified_at,
             // Расписания
             'schedules_created' => $this->schedules()->count(), // Количество созданных расписаний
             'active_schedules' => $this->schedules()

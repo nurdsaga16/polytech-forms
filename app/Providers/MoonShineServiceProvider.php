@@ -20,7 +20,7 @@ use App\MoonShine\Resources\SurveyResource;
 use App\MoonShine\Resources\TextAnswerResource;
 use App\MoonShine\Resources\UserResource;
 use Illuminate\Support\ServiceProvider;
-use MoonShine\ColorManager\ColorManager;
+use MoonShine\Contracts\ColorManager\ColorManagerContract;
 use MoonShine\Contracts\Core\DependencyInjection\ConfiguratorContract;
 use MoonShine\Contracts\Core\DependencyInjection\CoreContract;
 use MoonShine\Laravel\DependencyInjection\MoonShine;
@@ -32,37 +32,13 @@ final class MoonShineServiceProvider extends ServiceProvider
      * @param  MoonShine  $core
      * @param  MoonShineConfigurator  $config
      */
-    public function boot(CoreContract $core, ConfiguratorContract $config, ColorManager $colorManager): void
+    public function boot(CoreContract $core, ConfiguratorContract $config, ColorManagerContract $colorManager): void
     {
         // Настройка цветовой палитры
-        $colorManager->bulkAssign([
-            'primary' => '120, 67, 233', // #7843E9
-            'secondary' => '236, 65, 118', // #EC4180
-            'body' => '27, 37, 59',
+        $colorManager->primary('59, 130, 246'); // Ярко-синий (#3B82F6)
+        $colorManager->secondary('244, 63, 94'); // Малиновый (#F43F5E)
 
-            'dark' => [
-                'DEFAULT' => '30, 31, 67',
-                50 => '83, 103, 132',
-                100 => '74, 90, 121',
-                200 => '65, 81, 114',
-                300 => '53, 69, 103',
-                400 => '48, 61, 93',
-                500 => '41, 53, 82',
-                600 => '40, 51, 78',
-                700 => '39, 45, 69',
-                800 => '27, 37, 59',
-                900 => '15, 23, 42',
-            ],
-
-            'success-bg' => '0, 170, 0',
-            'success-text' => '255, 255, 255',
-            'warning-bg' => '255, 220, 42',
-            'warning-text' => '139, 116, 0',
-            'error-bg' => '224, 45, 45',
-            'error-text' => '255, 255, 255',
-            'info-bg' => '0, 121, 255',
-            'info-text' => '255, 255, 255',
-        ]);
+        $config->logo('storage/logo/logo-polytech-forms-v2.png')->logo('storage/logo/logo-polytech.png', small: true);
 
         $core
             ->resources([

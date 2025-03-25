@@ -34,9 +34,9 @@ final class SurveyController extends Controller
         return new SurveyResource($survey);
     }
 
-    public function show($id): SurveyResource
+    public function show($identifier): SurveyResource
     {
-        $survey = $this->surveyService->getSurveyById($id);
+        $survey = $this->surveyService->getSurveyById($identifier);
 
         return new SurveyResource($survey);
     }

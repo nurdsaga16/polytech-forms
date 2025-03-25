@@ -7,11 +7,13 @@ namespace App\MoonShine\Resources;
 use App\Models\Question;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
+use MoonShine\Core\Paginator\PaginatorCaster;
 use MoonShine\Laravel\Fields\Relationships\BelongsTo;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Support\Enums\PageType;
 use MoonShine\Support\Enums\SortDirection;
 use MoonShine\UI\Components\Layout\Box;
+use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\UI\Fields\Enum;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Number;
@@ -30,8 +32,6 @@ final class QuestionResource extends ModelResource
     protected int $itemsPerPage = 10;
 
     protected array $with = ['survey'];
-
-    protected bool $cursorPaginate = true;
 
     protected bool $columnSelection = true;
 
@@ -139,6 +139,24 @@ final class QuestionResource extends ModelResource
             'description',
             'question_type',
             'survey.title',
+        ];
+    }
+
+    protected function components(): iterable
+    {
+        $model = Question::query()->paginate();
+
+        $paginator = (new PaginatorCaster(
+            $model->appends(request()->except('page'))->toArray(),
+            $model->items()
+        ))->cast();
+
+        return [
+            TableBuilder::make()
+                ->fields([
+                    Text::make('Name'),
+                ])
+                ->items($paginator),
         ];
     }
 }

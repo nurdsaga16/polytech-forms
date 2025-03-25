@@ -7,32 +7,49 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\LoginUserRequest;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 final class AuthController extends Controller
 {
-    public function login(LoginUserRequest $request)
+    public function login(LoginUserRequest $request): JsonResponse
     {
         if (! Auth::attempt($request->only('email', 'password'))) {
-            return response()->json(['message' => 'Wrong email or password'], 401);
+            return response()->json([
+                'message' => 'Неверный email или пароль',
+            ], 401);
         }
 
-        //        $user = Auth::user();
-        $user = User::query()->where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
+
+        if (isset($user->active) && ! $user->active) {
+            Auth::logout();
+
+            return response()->json([
+                'message' => 'Ваш аккаунт деактивирован',
+            ], 403);
+        }
+
         $user->tokens()->delete();
+
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+        $emailVerified = $user->hasVerifiedEmail();
 
         return response()->json([
             'user' => $user,
-            'token' => $user->createToken("Token of user: {$user->name}")->plainTextToken,
-        ]);
+            'token' => $token,
+            'email_verified' => $emailVerified,
+            'message' => $emailVerified
+                ? 'Успешный вход в систему'
+                : 'Пожалуйста, подтвердите ваш email',
+        ], 200);
     }
 
-    public function logout()
+    public function logout(): JsonResponse
     {
         Auth::user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'message' => 'Logged out successfully',
-        ]);
+        return response()->json(['message' => 'Выход выполнен успешно'], 200);
     }
 }

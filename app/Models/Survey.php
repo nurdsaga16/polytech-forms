@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Support\Str;
 
 final class Survey extends Model
 {
@@ -20,7 +21,19 @@ final class Survey extends Model
         'schedule_id',
         'active',
         'template',
+        'public_id',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        self::creating(function ($survey) {
+            if (empty($survey->public_id)) {
+                $survey->public_id = Str::random(12);
+            }
+        });
+    }
 
     public function schedule(): BelongsTo
     {

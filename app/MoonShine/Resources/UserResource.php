@@ -7,12 +7,14 @@ namespace App\MoonShine\Resources;
 use App\Models\User;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
+use MoonShine\Core\Paginator\PaginatorCaster;
 use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Support\Enums\PageType;
 use MoonShine\Support\Enums\SortDirection;
 use MoonShine\Support\ListOf;
 use MoonShine\UI\Components\Layout\Box;
+use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\UI\Components\Tabs;
 use MoonShine\UI\Components\Tabs\Tab;
 use MoonShine\UI\Fields\Email;
@@ -33,8 +35,6 @@ final class UserResource extends ModelResource
     protected string $title = 'Преподаватели';
 
     protected int $itemsPerPage = 10;
-
-    protected bool $cursorPaginate = true;
 
     protected bool $columnSelection = true;
 
@@ -81,11 +81,11 @@ final class UserResource extends ModelResource
                     Tab::make('Пароль', [
                         Password::make(__('moonshine::ui.resource.password'), 'password')
                             ->customAttributes(['autocomplete' => 'new-password'])
-                            ->eye()->required(),
+                            ->eye(),
 
                         PasswordRepeat::make(__('moonshine::ui.resource.repeat_password'), 'password_repeat')
                             ->customAttributes(['autocomplete' => 'confirm-password'])
-                            ->eye()->required(),
+                            ->eye(),
                     ])->icon('lock-closed'),
                 ]),
             ]),
@@ -127,6 +127,24 @@ final class UserResource extends ModelResource
             'id',
             'full_name',
             'email',
+        ];
+    }
+
+    protected function components(): iterable
+    {
+        $model = User::query()->paginate();
+
+        $paginator = (new PaginatorCaster(
+            $model->appends(request()->except('page'))->toArray(),
+            $model->items()
+        ))->cast();
+
+        return [
+            TableBuilder::make()
+                ->fields([
+                    Text::make('Name'),
+                ])
+                ->items($paginator),
         ];
     }
 }

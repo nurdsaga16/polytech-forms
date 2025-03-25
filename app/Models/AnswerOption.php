@@ -21,17 +21,12 @@ final class AnswerOption extends Model
 
     public function question(): BelongsTo
     {
-        return $this->belongsTo(Question::class, 'question_id');
+        return $this->belongsTo(Question::class);
     }
 
     public function survey(): HasOneThrough
     {
-        return $this->hasOneThrough(Survey::class, Question::class, 'survey_id', 'id', 'id', 'id');
-    }
-
-    public function section(): HasOneThrough
-    {
-        return $this->hasOneThrough(Section::class, Question::class, 'section_id', 'id', 'id', 'id');
+        return $this->hasOneThrough(Survey::class, Question::class, 'id', 'id', 'question_id', 'survey_id');
     }
 
     public function choiceAnswers(): HasMany

@@ -7,6 +7,7 @@ namespace App\MoonShine\Resources;
 use App\Models\AnswerOption;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
+use MoonShine\Core\Paginator\PaginatorCaster;
 use MoonShine\Laravel\Enums\Action;
 use MoonShine\Laravel\Fields\Relationships\BelongsTo;
 use MoonShine\Laravel\Resources\ModelResource;
@@ -14,6 +15,7 @@ use MoonShine\Support\Enums\PageType;
 use MoonShine\Support\Enums\SortDirection;
 use MoonShine\Support\ListOf;
 use MoonShine\UI\Components\Layout\Box;
+use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Number;
 use MoonShine\UI\Fields\Text;
@@ -29,9 +31,7 @@ final class AnswerOptionResource extends ModelResource
 
     protected int $itemsPerPage = 10;
 
-    protected array $with = ['question', 'survey'];
-
-    protected bool $cursorPaginate = true;
+    protected array $with = ['question'];
 
     protected bool $columnSelection = true;
 
@@ -103,10 +103,10 @@ final class AnswerOptionResource extends ModelResource
     protected function filters(): iterable
     {
         return [
-            BelongsTo::make('Опрос', 'survey', 'title', SurveyResource::class)
+            BelongsTo::make('Вопрос', 'question', 'title', QuestionResource::class)
                 ->nullable()
                 ->searchable(),
-            BelongsTo::make('Вопрос', 'question', 'title', QuestionResource::class)
+            BelongsTo::make('Опрос', 'survey', 'title', SurveyResource::class)
                 ->nullable()
                 ->searchable(),
             Number::make('Номер порядка', 'order'),
@@ -119,7 +119,24 @@ final class AnswerOptionResource extends ModelResource
             'id',
             'title',
             'question.title',
-            'survey.title',
+        ];
+    }
+
+    protected function components(): iterable
+    {
+        $model = AnswerOption::query()->paginate();
+
+        $paginator = (new PaginatorCaster(
+            $model->appends(request()->except('page'))->toArray(),
+            $model->items()
+        ))->cast();
+
+        return [
+            TableBuilder::make()
+                ->fields([
+                    Text::make('Name'),
+                ])
+                ->items($paginator),
         ];
     }
 }
